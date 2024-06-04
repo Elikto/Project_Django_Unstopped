@@ -127,33 +127,7 @@ start cmd /k "python makemigration_migrate.py"
         with open(fichier_bat_path, "w", encoding="utf-8") as file:
             file.write(fichier_bat.strip())
 
-        # Créer un objet pour le bureau de l'utilisateur
-        desktop = winshell.desktop()
-
-    # Chemin complet du fichier .bat
-        bat_file_path = os.path.join(django_unstopped_path, "DjangoUnstopped.bat")
-
-        # Convertir le fichier .bat en .exe avec pyinstaller
-        pyinstaller_path = shutil.which("pyinstaller")
-        subprocess.run([pyinstaller_path, "--onefile", bat_file_path], shell=True)
-
-        # Renommer le fichier .exe
-        exe_file_path = os.path.join(django_unstopped_path, "DjangoUnstopped.exe")
-        os.rename(os.path.join(django_unstopped_path, "dist", "DjangoUnstopped.exe"), exe_file_path)
-        shutil.rmtree(os.path.join(django_unstopped_path, "dist"))
-        shutil.rmtree(os.path.join(django_unstopped_path, "build"))
-
-        # Créer un raccourci vers le fichier .exe sur le bureau
-        desktop = winshell.desktop()
-        shortcut_file_path = os.path.join(desktop, "DjangoUnstopped.lnk")
-        shell = Dispatch('WScript.Shell')
-        shortcut = shell.CreateShortCut(shortcut_file_path)
-        shortcut.Targetpath = exe_file_path
-        shortcut.WorkingDirectory = os.path.dirname(exe_file_path)
-        shortcut.save()
-
-        print(f"Le fichier exécutable 'DjangoUnstopped.exe' a été créé dans {django_unstopped_path}")
-        print(f"Le raccourci vers DjangoUnstopped.exe a été créé sur le bureau de l'utilisateur.")
+        print(f"Les fichier runserver.py et makemigration_migrate.py ont été crées dans {django_unstopped_path}")
 
         # Fin de la fonction
         return folder_paths
@@ -161,7 +135,9 @@ start cmd /k "python makemigration_migrate.py"
 
     else:
         print(f"Le dossier '{my_folder}' n'a pas été trouvé.")
-    
+        
+    input("Appuyez sur n'importe quelle touche pour quitter...")
+
     return folder_paths
 
 if __name__ == "__main__":

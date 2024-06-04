@@ -128,6 +128,7 @@ start cmd /k "python makemigration_migrate.py"
             file.write(fichier_bat.strip())
 
         print(f"Les fichier runserver.py et makemigration_migrate.py ont été crées dans {django_unstopped_path}")
+# pyinstaller --onefile mon_script_principal.py mon_second_script.py
 
         # Fin de la fonction
         return folder_paths

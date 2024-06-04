@@ -26,16 +26,26 @@ def find_folder():
     folder_paths = result.stdout.strip().split('\n')
     
     if folder_paths and folder_paths[0]:
-        for path in folder_paths:
-            print(f"Le dossier '{my_folder}' a été trouvé dans le sous-dossier {path}")
+        for index, path in enumerate(folder_paths, start=1):
+            print(f"{index}: Le dossier '{my_folder}' a été trouvé dans le sous-dossier {path}")
+        
+        while True:
+            user_input = input("Entrez le numéro du dossier que vous souhaitez utiliser ou 'exit' pour quitter: ")
+            if user_input.lower() == 'exit':
+                return
+            elif user_input.isdigit() and 1 <= int(user_input) <= len(folder_paths):
+                chosen_folder_path = folder_paths[int(user_input) - 1].replace('\\', '\\\\')
+                break
+            else:
+                print("Entrée invalide. Veuillez entrer un numéro de dossier valide ou 'exit' pour quitter.")
         
         # Créer un dossier 'DjangoUnstopped' dans le répertoire Documents de l'utilisateur
         user_documents_folder = os.path.join(os.path.expanduser("~"), "Documents")
         django_unstopped_path = os.path.join(user_documents_folder, "DjangoUnstopped")
         os.makedirs(django_unstopped_path, exist_ok=True)
         
-        # Créer le fichier 'run_django.py' dans le dossier 'DjangoUnstopped'
-        run_django_script = f"""
+        # Créer le fichier 'runserver.py' dans le dossier 'DjangoUnstopped'
+        run_server_script = f"""
 import subprocess
 
 def run_server():
@@ -43,7 +53,7 @@ def run_server():
         try:
             subprocess.run('color 3', shell=True)
             subprocess.run('cls', shell=True)
-            command = f'start cmd /k "cd {path} && python manage.py runserver"'
+            command = r'cmd /c "cd {chosen_folder_path} && python manage.py runserver"'
             print("Serveur Django en cours d'exécution...")
             process = subprocess.Popen(command, shell=True)
             process.wait()  # Attend que le processus se termine
@@ -56,7 +66,13 @@ def run_server():
         except Exception as e:
             print(f"Erreur: {{e}}")
 
-    run_command()
+if __name__ == "__main__":
+    run_server()
+"""
+
+        # Créer le fichier 'makemigration_migrate.py' dans le dossier 'DjangoUnstopped'
+        makemigration_migrate_script = f"""
+import subprocess
 
 def run_command():
     while True:
@@ -67,7 +83,7 @@ def run_command():
         elif user_input == '1':
             # Construction de la commande à exécuter
             subprocess.run('cls', shell=True)
-            command = f'start cmd /k "cd {path } && python manage.py makemigrations && python manage.py migrate"'
+            command = r'cmd /k "cd {chosen_folder_path} && python manage.py makemigrations && python manage.py migrate"'
             print("Exécution des migrations Django...")
             # Exécution de la commande dans un nouveau processus
             subprocess.run(command, shell=True)
@@ -75,14 +91,18 @@ def run_command():
             print("Entrée invalide. Veuillez entrer '1' pour exécuter la commande ou 'exit' pour quitter.")
 
 if __name__ == "__main__":
-    run_server()
+    run_command()
 """
 
-        run_django_file_path = os.path.join(django_unstopped_path, "run_django.py")
-        with open(run_django_file_path, "w") as file:
-            file.write(run_django_script.strip())
+        run_server_file_path = os.path.join(django_unstopped_path, "runserver.py")
+        with open(run_server_file_path, "w", encoding="utf-8") as file:
+            file.write(run_server_script.strip())
 
-        print(f"Le fichier 'run_django.py' a été créé dans {django_unstopped_path}")
+        makemigration_migrate_file_path = os.path.join(django_unstopped_path, "makemigration_migrate.py")
+        with open(makemigration_migrate_file_path, "w", encoding="utf-8") as file:
+            file.write(makemigration_migrate_script.strip())
+
+        print(f"Les fichiers 'runserver.py' et 'makemigration_migrate.py' ont été créés dans {django_unstopped_path}")
     else:
         print(f"Le dossier '{my_folder}' n'a pas été trouvé.")
     

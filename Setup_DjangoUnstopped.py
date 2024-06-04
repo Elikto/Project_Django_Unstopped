@@ -1,5 +1,7 @@
 import os
 import subprocess
+import winshell
+from win32com.client import Dispatch
 
 def find_folder():
     subprocess.run('color 3', shell=True)
@@ -77,21 +79,38 @@ import subprocess
 def run_command():
     while True:
         subprocess.run('color 2', shell=True)
-        user_input = input('Entrez 1 pour exécuter "python manage.py makemigrations && python manage.py migrate" ou "exit" pour quitter: ')
+        user_input = input('Appuyez sur ENTREE pour exécuter "python manage.py makemigrations && python manage.py migrate" ou "exit" pour quitter: ')
         if user_input.lower() == 'exit':
             break
-        elif user_input == '1':
+        elif not user_input:  # Si l'entrée est vide (aucune touche n'est pressée)
             # Construction de la commande à exécuter
             subprocess.run('cls', shell=True)
-            command = r'cmd /k "cd {chosen_folder_path} && python manage.py makemigrations && python manage.py migrate"'
+            command = r'cmd /c "cd C:\\Users\\Formation\\Documents\\algo\\django-web-app\\merchex && python manage.py makemigrations && python manage.py migrate"'
             print("Exécution des migrations Django...")
             # Exécution de la commande dans un nouveau processus
             subprocess.run(command, shell=True)
         else:
-            print("Entrée invalide. Veuillez entrer '1' pour exécuter la commande ou 'exit' pour quitter.')
+            print("Entrée invalide. Appuyez simplement sur ENTREE pour exécuter la commande ou 'exit' pour quitter.")
 
 if __name__ == "__main__":
     run_command()
+
+"""
+
+        fichier_bat = f"""
+    
+@echo off
+
+
+rem Lancer le serveur Django dans une nouvelle fenêtre de commande
+start cmd /k "python runserver.py"
+
+rem Attendre un court instant pour que la première fenêtre se lance complètement
+timeout /t 2 /nobreak >nul
+
+rem Exécuter les migrations Django dans une nouvelle fenêtre de commande
+start cmd /k "python makemigration_migrate.py"
+
 """
 
         run_server_file_path = os.path.join(django_unstopped_path, "runserver.py")
@@ -102,7 +121,31 @@ if __name__ == "__main__":
         with open(makemigration_migrate_file_path, "w", encoding="utf-8") as file:
             file.write(makemigration_migrate_script.strip())
 
+        fichier_bat_path = os.path.join(django_unstopped_path, "DjangoUnstopped.bat")
+        with open(fichier_bat_path, "w", encoding="utf-8") as file:
+            file.write(fichier_bat.strip())
+
+        # Créer un objet pour le bureau de l'utilisateur
+        desktop = winshell.desktop()
+
+        # Chemin complet du fichier .bat
+        bat_file_path = os.path.join(django_unstopped_path, "DjangoUnstopped.bat")
+
+        # Créer un raccourci vers le fichier .bat sur le bureau
+        shortcut_file_path = os.path.join(desktop, "DjangoUnstopped.lnk")
+        shell = Dispatch('WScript.Shell')
+        shortcut = shell.CreateShortCut(shortcut_file_path)
+        shortcut.Targetpath = bat_file_path
+        shortcut.WorkingDirectory = os.path.dirname(bat_file_path)
+        shortcut.save()
+        
         print(f"Les fichiers 'runserver.py' et 'makemigration_migrate.py' ont été créés dans {django_unstopped_path}")
+        # Afficher un message pour indiquer que le raccourci a été créé
+        print(f"Le raccourci vers DjangoUnstopped.bat a été créé sur le bureau de l'utilisateur.")
+        # Fin de la fonction
+        return folder_paths
+
+
     else:
         print(f"Le dossier '{my_folder}' n'a pas été trouvé.")
     

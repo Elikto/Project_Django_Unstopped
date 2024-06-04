@@ -1,7 +1,9 @@
+
 import os
 import subprocess
 import winshell
 from win32com.client import Dispatch
+import shutil
 
 def find_folder():
     subprocess.run('color 3', shell=True)
@@ -128,20 +130,30 @@ start cmd /k "python makemigration_migrate.py"
         # Créer un objet pour le bureau de l'utilisateur
         desktop = winshell.desktop()
 
-        # Chemin complet du fichier .bat
+    # Chemin complet du fichier .bat
         bat_file_path = os.path.join(django_unstopped_path, "DjangoUnstopped.bat")
 
-        # Créer un raccourci vers le fichier .bat sur le bureau
+        # Convertir le fichier .bat en .exe avec pyinstaller
+        pyinstaller_path = shutil.which("pyinstaller")
+        subprocess.run([pyinstaller_path, "--onefile", bat_file_path], shell=True)
+
+        # Renommer le fichier .exe
+        exe_file_path = os.path.join(django_unstopped_path, "DjangoUnstopped.exe")
+        os.rename(os.path.join(django_unstopped_path, "dist", "DjangoUnstopped.exe"), exe_file_path)
+        shutil.rmtree(os.path.join(django_unstopped_path, "dist"))
+        shutil.rmtree(os.path.join(django_unstopped_path, "build"))
+
+        # Créer un raccourci vers le fichier .exe sur le bureau
+        desktop = winshell.desktop()
         shortcut_file_path = os.path.join(desktop, "DjangoUnstopped.lnk")
         shell = Dispatch('WScript.Shell')
         shortcut = shell.CreateShortCut(shortcut_file_path)
-        shortcut.Targetpath = bat_file_path
-        shortcut.WorkingDirectory = os.path.dirname(bat_file_path)
+        shortcut.Targetpath = exe_file_path
+        shortcut.WorkingDirectory = os.path.dirname(exe_file_path)
         shortcut.save()
-        
-        print(f"Les fichiers 'runserver.py' et 'makemigration_migrate.py' ont été créés dans {django_unstopped_path}")
-        # Afficher un message pour indiquer que le raccourci a été créé
-        print(f"Le raccourci vers DjangoUnstopped.bat a été créé sur le bureau de l'utilisateur.")
+
+        print(f"Le fichier exécutable 'DjangoUnstopped.exe' a été créé dans {django_unstopped_path}")
+        print(f"Le raccourci vers DjangoUnstopped.exe a été créé sur le bureau de l'utilisateur.")
 
         # Fin de la fonction
         return folder_paths
